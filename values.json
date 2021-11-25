@@ -1,0 +1,83 @@
+{
+    "mainStat":{
+       "ATK":47,
+       "ATK%":7.0,
+       "HP":717,
+       "HP%":7.0,
+       "DEF%":8.7,
+       "Crit DMG%":9.3,
+       "Crit Rate%":4.7,
+       "Elemental Mastery":28,
+       "Energy Recharge%":7.8,
+       "Pyro DMG Bonus%":7.0,
+       "Electro DMG Bonus%":7.0,
+       "Cryo DMG Bonus%":7.0,
+       "Hydro DMG Bonus%":7.0,
+       "Anemo DMG Bonus%":7.0,
+       "Geo DMG Bonus%":7.0,
+       "Physical DMG Bonus%":8.7,
+       "Healing Bonus%":5.4
+    },
+    "subStat":{
+       "HP":[
+          209,
+          239,
+          268,
+          298
+       ],
+       "DEF":[
+          16,
+          18,
+          20,
+          23
+       ],
+       "ATK":[
+          13,
+          15,
+          17,
+          19
+       ],
+       "HP%":[
+          4.1,
+          4.7,
+          5.3,
+          5.8
+       ],
+       "ATK%":[
+          4.1,
+          4.7,
+          5.3,
+          5.8
+       ],
+       "DEF%":[
+          5.1,
+          5.8,
+          6.6,
+          7.3
+       ],
+       "Energy Recharge%":[
+          4.5,
+          5.2,
+          5.8,
+          6.5
+       ],
+       "Elemental Mastery":[
+          16,
+          18,
+          21,
+          23
+       ],
+       "Crit Rate%":[
+          2.7,
+          3.1,
+          3.5,
+          3.9
+       ],
+       "Crit DMG%":[
+          5.4,
+          6.2,
+          7.0,
+          7.8
+       ]
+    }
+ }
