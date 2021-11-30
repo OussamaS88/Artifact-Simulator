@@ -37,7 +37,7 @@ def gen(specifiedType = None, lines=None):
     artifact["Stat"]["type"] = tempName
     artifact["Value"]["type"] = 0
 
-    artifact["Value"]["mainStat"]= values.loc[stat, "mainStat"]
+    artifact["Value"]["mainStat"]= values.loc[stat, "mainStat"][0]
     value = ""
     try :
         value = subStatChances[tempName].drop(stat)
@@ -67,6 +67,9 @@ def getStat(myType):
     return stat
 
 def upgrade(artifact):
+    if artifact.loc["type", "Value"] >= 20: return artifact
+    artifact.loc["type", "Value"] += 4
+    artifact.loc["mainStat", "Value"] = values.loc[artifact.loc["mainStat", "Stat"], "mainStat"][int(artifact.loc["type", "Value"] / 4)]
     if "sub4" not in artifact.index:
         aName = artifact.loc["type", "Stat"]
         v = ""
