@@ -145,15 +145,21 @@ def removeArtifact(position = -1):
         data = json.dump(data, data_file)
     return k
 
-def returnSpecific(mySet, countOnly= False, main=None):
+def returnSpecific(mySet, countOnly= False, aType=None, main= None):
     arr = []
     for x in retrieveArtifact():
         if set(mySet).issubset(set(x.loc["sub1":, "Stat"].values)):
-            if main == None:
-                arr.append(x)
-            else:
-                if main in x.loc["type", "Stat"]:
+            if aType == None:
+                if main == None:
                     arr.append(x)
+                else:
+                    if main in x.loc["mainStat", "Stat"]: arr.append(x)
+            else:
+                if aType in x.loc["type", "Stat"]:
+                    if main == None:
+                        arr.append(x)
+                    else:
+                        if main in x.loc["mainStat", "Stat"]: arr.append(x)
     return arr if countOnly == False else len(arr)
 
 def upgradeMax(artifact):
@@ -162,7 +168,7 @@ def upgradeMax(artifact):
     return artifact
 
 def reRoll(artifact, subs, numbers, tries = 0):
-    temp = artifact
+    temp = artifact.copy()
     max = upgradeMax(artifact)
     if not (set(subs).issubset(set(max.loc["sub1":, "Stat"].values))):
         tries +=1
@@ -174,5 +180,11 @@ def reRoll(artifact, subs, numbers, tries = 0):
             else:
                 tries +=1
                 return reRoll(temp, subs, numbers, tries)
-        return [max, tries]
+    return [max, tries+1]
 
+def reset(count = 0):
+    removeArtifact()
+    if count > 0:
+        for i in range(count):
+            save_artifact(gen())
+    else : removeArtifact()
