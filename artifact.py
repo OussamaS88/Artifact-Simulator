@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from numpy.random import default_rng
 import json
+import im as renderer
 
 rng = default_rng()
 
@@ -191,3 +192,6 @@ def reset(count = 0):
         for i in range(count):
             save_artifact(gen())
     else : removeArtifact()
+k = gen()
+renderer.render(k, save= True, show = False)
+renderer.render(upgradeMax(k), save= True, name="upgraded", show= False)
