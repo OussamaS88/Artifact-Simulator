@@ -3,8 +3,10 @@ import pandas as pd
 from numpy.random import default_rng
 import json
 import im as renderer
+import os
 
 rng = default_rng()
+parent_dir = os.getcwd()
 
 exceptions = {'Pyro DMG Bonus%',
         'Electro DMG Bonus%','Cryo DMG Bonus%','Hydro DMG Bonus%','Anemo DMG Bonus%','Geo DMG Bonus%',
@@ -91,7 +93,7 @@ def upgrade(artifact):
         return pd.DataFrame(k)
     else:
         r = "sub" + str(rng.choice([1,2,3,4]))
-        artifact.loc[r, "Value"] += rng.choice(values.loc[artifact.loc[r, "Stat"], "subStat"])
+        artifact.loc[r, "Value"] = np.round(artifact.loc[r, "Value"] + rng.choice(values.loc[artifact.loc[r, "Stat"], "subStat"]), 1) 
         return artifact
 
 def save_artifact(artifact: pd.DataFrame, position = -1):
@@ -166,10 +168,13 @@ def returnSpecific(mySet, countOnly= False, aType=None, main= None):
                         if main in x.loc["mainStat", "Stat"]: arr.append(x)
     return arr if countOnly == False else len(arr)
 
-def upgradeMax(artifact):
-    for i in range(5):
+def upgradeCount(artifact, count = 0):
+    for i in range(count):
         artifact = upgrade(artifact)
     return artifact
+
+def upgradeMax(artifact):
+    return upgradeCount(artifact, 5)
 
 def reRoll(artifact, subs, numbers, tries = 0):
     temp = artifact.copy()
@@ -192,6 +197,31 @@ def reset(count = 0):
         for i in range(count):
             save_artifact(gen())
     else : removeArtifact()
-k = gen()
-renderer.render(k, save= True, show = False)
-renderer.render(upgradeMax(k), save= True, name="upgraded", show= False)
+# k = gen()
+# renderer.render(k, save= True)
+# renderer.render(upgradeMax(k), save= True, name="upgraded", show= False)
+
+def saveCopies(artifact = "random", count = 1, name = 0, directory = "default"):
+    if count < 1 : return
+    path = None
+    try:
+        path = os.path.join(parent_dir, "savedArtifacts/" + directory)
+        os.mkdir(path)
+    except:
+        for k in rng.integers(0, 30, size=10):
+            directory += str(k)
+        path = os.path.join(parent_dir,"savedArtifacts/" + directory)
+        os.mkdir(path)
+    if (not isinstance(artifact, pd.DataFrame)) and artifact == "random":
+        if count > 25: count = 25
+        for a in range(count):
+            artifact = gen()
+            renderer.render(artifact, save= True, name=str(a+1), path = path, show=False)
+    elif isinstance(artifact, pd.DataFrame):
+        stop = 0
+        for a in range(count):
+            renderer.render(artifact, save= True, name=str(a), path = path, show=False)
+            artifact = upgrade(artifact)
+            stop += 1
+            if stop == 6: return
+    return

@@ -4,7 +4,7 @@ regFont = ImageFont.truetype("Lato-Regular.ttf", 24)
 boldFont = ImageFont.truetype("Lato-Bold.ttf", 40)
 smallBoldFont = ImageFont.truetype("Lato-Bold.ttf", 24)
 
-def render(artifact, save= False, name="default", show = True):
+def render(artifact, save= False, name="default", show = True, path="savedArtifacts/"):
     type = artifact.loc["type", "Stat"]
     if "Goblet" in type:
         type = "Goblet"
@@ -32,5 +32,5 @@ def render(artifact, save= False, name="default", show = True):
         bgEdit.text((55, pos), t, (80, 84, 87), font=smallBoldFont)
         pos+=37
     if save == True:
-        background.save("savedArtifacts/{}.jpg".format(str(name)))
+        background.save("{}/{}.jpg".format(path , str(name)))
     return background.show() if show else artifact
