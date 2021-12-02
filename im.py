@@ -1,16 +1,20 @@
 from PIL import Image, ImageFont, ImageDraw
+from numpy.random import default_rng
+
+rng = default_rng()
 
 regFont = ImageFont.truetype("Lato-Regular.ttf", 24)
 boldFont = ImageFont.truetype("Lato-Bold.ttf", 40)
 smallBoldFont = ImageFont.truetype("Lato-Bold.ttf", 24)
 
-def render(artifact, save= False, name="default", show = True, path="savedArtifacts/"):
+def render(artifact, save= False, name="default", show = True, path="savedArtifacts/", set = ["emblem", "shiminawa"]):
+    chosenSet = rng.choice(set)
     type = artifact.loc["type", "Stat"]
     if "Goblet" in type:
         type = "Goblet"
     elif "Circlet" in type:
         type = "Circlet"
-    background = Image.open("static/{}.jpg".format(type))
+    background = Image.open("static/{}/{}.jpg".format(chosenSet, type))
     bgEdit = ImageDraw.Draw(background)
     mStat = artifact.loc["mainStat", "Stat"]
     mStatV = str(artifact.loc["mainStat", "Value"])

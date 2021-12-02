@@ -201,7 +201,7 @@ def reset(count = 0):
 # renderer.render(k, save= True)
 # renderer.render(upgradeMax(k), save= True, name="upgraded", show= False)
 
-def saveCopies(artifact = "random", count = 1, name = 0, directory = "default"):
+def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", set = ["emblem", "shiminawa"]):
     if count < 1 : return
     path = None
     try:
@@ -216,12 +216,13 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default"):
         if count > 25: count = 25
         for a in range(count):
             artifact = gen()
-            renderer.render(artifact, save= True, name=str(a+1), path = path, show=False)
+            renderer.render(artifact, save= True, name=str(a+1), path = path, show=False, set = set)
     elif isinstance(artifact, pd.DataFrame):
         stop = 0
         for a in range(count):
-            renderer.render(artifact, save= True, name=str(a), path = path, show=False)
+            renderer.render(artifact, save= True, name=str(a), path = path, show=False, set = set)
             artifact = upgrade(artifact)
             stop += 1
             if stop == 6: return
     return
+saveCopies(count = 5)
