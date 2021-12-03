@@ -1,11 +1,15 @@
 from PIL import Image, ImageFont, ImageDraw
 from numpy.random import default_rng
+import os
+
+parent_dir = os.getcwd()
+fontPath = "{}/static/fonts/".format(parent_dir)
 
 rng = default_rng()
 
-regFont = ImageFont.truetype("Lato-Regular.ttf", 24)
-boldFont = ImageFont.truetype("Lato-Bold.ttf", 40)
-smallBoldFont = ImageFont.truetype("Lato-Bold.ttf", 24)
+regFont = ImageFont.truetype("{}Lato-Regular.ttf".format(fontPath), 24)
+boldFont = ImageFont.truetype("{}Lato-Bold.ttf".format(fontPath), 40)
+smallBoldFont = ImageFont.truetype("{}Lato-Bold.ttf".format(fontPath), 24)
 
 def render(artifact, save= False, name="default", show = True, path="savedArtifacts/", set = ["emblem", "shiminawa"]):
     chosenSet = rng.choice(set)

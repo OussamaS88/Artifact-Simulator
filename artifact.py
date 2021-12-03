@@ -12,9 +12,11 @@ exceptions = {'Pyro DMG Bonus%',
         'Electro DMG Bonus%','Cryo DMG Bonus%','Hydro DMG Bonus%','Anemo DMG Bonus%','Geo DMG Bonus%',
         'Physical DMG Bonus%', 'Healing Bonus%'}
 
-subStatChances = pd.read_json("sub.json").fillna(0)
-mainStatChances = pd.read_json("main.json").fillna(0)
-values = pd.read_json("values.json").fillna(0)
+dataPath = "{}/static/data/".format(parent_dir)
+savePath = "{}/savedArtifacts/".format(parent_dir)
+subStatChances = pd.read_json("{}sub.json".format(dataPath)).fillna(0)
+mainStatChances = pd.read_json("{}main.json".format(dataPath)).fillna(0)
+values = pd.read_json("{}values.json".format(dataPath)).fillna(0)
 
 def gen(specifiedType = None, lines=None):
     artifact = {"Stat":{}, "Value":{}}
@@ -99,7 +101,7 @@ def upgrade(artifact):
 def save_artifact(artifact: pd.DataFrame, position = -1):
     s = json.dumps(artifact.to_dict())
     if position < 0:
-        with open("artifacts.json",'r+') as file:
+        with open("{}artifacts.json".format(savePath),'r+') as file:
             file_data = json.load(file)
             k = 0
             if len(file_data) > 0:
@@ -111,7 +113,7 @@ def save_artifact(artifact: pd.DataFrame, position = -1):
             json.dump(file_data, file, indent = 4)
     else:
         removeArtifact(str(position))
-        with open("artifacts.json",'r+') as file:
+        with open("{}artifacts.json".format(savePath),'r+') as file:
             file_data = json.load(file)
             file_data[position] = s
             file.seek(0)
@@ -121,7 +123,7 @@ def save_artifact(artifact: pd.DataFrame, position = -1):
 def retrieveArtifact(pos = -1):
     data = {}
     arr = []
-    with open("artifacts.json", "r") as file:
+    with open("{}artifacts.json".format(savePath), "r") as file:
         data = json.load(file)
     if pos < 0:
         for x in data:
@@ -133,7 +135,7 @@ def retrieveArtifact(pos = -1):
 def removeArtifact(position = -1):
     data = {}
     k = None
-    with open('artifacts.json', 'r') as data_file:
+    with open("{}artifacts.json".format(savePath), 'r') as data_file:
         data = json.load(data_file)
     if position < 0:
         i = data.copy()
@@ -147,7 +149,7 @@ def removeArtifact(position = -1):
             data.pop(str(position))
         except:
             return "No artifact at this position"
-    with open('artifacts.json', 'w') as data_file:
+    with open("{}artifacts.json".format(savePath), 'w') as data_file:
         data = json.dump(data, data_file)
     return k
 
@@ -197,9 +199,6 @@ def reset(count = 0):
         for i in range(count):
             save_artifact(gen())
     else : removeArtifact()
-# k = gen()
-# renderer.render(k, save= True)
-# renderer.render(upgradeMax(k), save= True, name="upgraded", show= False)
 
 def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", set = ["emblem", "shiminawa"]):
     if count < 1 : return
@@ -225,4 +224,4 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
             stop += 1
             if stop == 6: return
     return
-saveCopies(count = 5)
+removeArtifact()
