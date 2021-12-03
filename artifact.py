@@ -2,8 +2,12 @@ import numpy as np
 import pandas as pd
 from numpy.random import default_rng
 import json
+
+from pandas.io.pytables import attribute_conflict_doc
+from pytesseract.pytesseract import main
 import im as renderer
 import os
+import text as imageProcessor
 
 rng = default_rng()
 parent_dir = os.getcwd()
@@ -178,6 +182,24 @@ def upgradeCount(artifact, count = 0):
 def upgradeMax(artifact):
     return upgradeCount(artifact, 5)
 
+def createCustom(type = "Flower", mainStat=["HP", 717.0], substats = ["DEF%", "DEF", "ATK"], svalues = [5.1, 16, 13]):
+    if len(substats) > 4 or len(svalues) > 4 or (type not in mainStatChances.columns) or (len(substats) != len(svalues)):
+        return "Invalid"
+    main = [mainStat[0],mainStat[1]]
+    aType = [type, 0.0]
+    subs = []
+    for i in range(len(substats)):
+        subs.append([substats[i], svalues[i]])
+    subsIndex = []
+    for k in range(len(substats)):
+        subsIndex.append("sub" + str(k+1))
+    data = [main, aType]
+    data.extend(subs)
+    indices = ["mainStat", "type"]
+    indices.extend(subsIndex)
+    artifact = pd.DataFrame(data, index=indices, columns=["Stat", "Value"])
+    return artifact
+
 def reRoll(artifact, subs, numbers, tries = 0):
     temp = artifact.copy()
     max = upgradeMax(artifact)
@@ -224,4 +246,22 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
             stop += 1
             if stop == 6: return
     return
-removeArtifact()
+
+def imageToArtifact(path):
+    i = imageProcessor.readFromImage(path)
+    if not isinstance(i, list): return i
+    aType, mainStat, subS, subV = i
+    if mainStat[0] == "NULL" or mainStat[0] not in mainStatChances[aType].index.tolist():
+        choices = mainStatChances[aType][mainStatChances[aType] > 0].index.tolist()
+        mainStat[0] = rng.choice(choices)
+    if mainStat[1] == 0:
+        try:
+            mainStat[1] = values.loc[mainStat[0], "mainStat"][0]
+        except:
+            mainStat[1] = values.loc[mainStat[0], "mainStat"]
+    return createCustom(aType, mainStat, subS, subV)
+
+
+
+print(imageToArtifact("savedArtifacts/new/2.jpg"))
+# saveCopies(count= 25, directory="new")
