@@ -183,7 +183,7 @@ def upgradeMax(artifact):
     return upgradeCount(artifact, 5)
 
 def createCustom(type = "Flower", mainStat=["HP", 717.0], substats = ["DEF%", "DEF", "ATK"], svalues = [5.1, 16, 13]):
-    if len(substats) > 4 or len(svalues) > 4 or (type not in mainStatChances.columns) or (len(substats) != len(svalues)):
+    if len(substats) > 4 or len(svalues) > 4 or (len(substats) != len(svalues)):
         return "Invalid"
     main = [mainStat[0],mainStat[1]]
     aType = [type, 0.0]
@@ -245,7 +245,7 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
             artifact = upgrade(artifact)
             stop += 1
             if stop == 6: return
-    return
+    return "Must be higher than 0"
 
 def imageToArtifact(path):
     i = imageProcessor.readFromImage(path)
@@ -254,14 +254,23 @@ def imageToArtifact(path):
     if mainStat[0] == "NULL" or mainStat[0] not in mainStatChances[aType].index.tolist():
         choices = mainStatChances[aType][mainStatChances[aType] > 0].index.tolist()
         mainStat[0] = rng.choice(choices)
+    
+    if aType == "Circlet":
+        if mainStat[0] in ['Crit Rate%', 'Crit DMG%']:
+            aType +="Crit"
+        elif mainStat[0] in 'Healing Bonus%':
+            aType += 'HB'
+        else :
+            aType += "Normal"
+    elif aType == "Goblet":
+        if mainStat[0] in ['ATK%', 'HP%', 'DEF%', 'Elemental Mastery', 'Energy Recharge%']:
+            aType +="NonEl"
+        else :
+            aType += "El"
+
     if mainStat[1] == 0:
         try:
             mainStat[1] = values.loc[mainStat[0], "mainStat"][0]
         except:
             mainStat[1] = values.loc[mainStat[0], "mainStat"]
     return createCustom(aType, mainStat, subS, subV)
-
-
-
-print(imageToArtifact("savedArtifacts/new/2.jpg"))
-# saveCopies(count= 25, directory="new")

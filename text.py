@@ -10,7 +10,7 @@ def readFromImage(path_to_image):
         img = Image.open(path_to_image)
         width, height = img.size
         subs = img.crop((73, 270, 368, 480))
-        mainInfo = img.crop((1,110,210, 200))
+        mainInfo = img.crop((1,110,240, 200))
         aTypeIMG = img.crop((7, 50, 195, 100))
         pytesseract.tesseract_cmd = path_to_tesseract
         
