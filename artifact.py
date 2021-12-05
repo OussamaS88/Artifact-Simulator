@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 from numpy.random import default_rng
 import json
-
-from pandas.io.pytables import attribute_conflict_doc
-from pytesseract.pytesseract import main
 import im as renderer
 import os
 import text as imageProcessor
@@ -12,36 +9,35 @@ import text as imageProcessor
 rng = default_rng()
 parent_dir = os.getcwd()
 
-exceptions = {'Pyro DMG Bonus%',
-        'Electro DMG Bonus%','Cryo DMG Bonus%','Hydro DMG Bonus%','Anemo DMG Bonus%','Geo DMG Bonus%',
-        'Physical DMG Bonus%', 'Healing Bonus%'}
-
 dataPath = "{}/static/data/".format(parent_dir)
 savePath = "{}/savedArtifacts/".format(parent_dir)
 subStatChances = pd.read_json("{}sub.json".format(dataPath)).fillna(0)
 mainStatChances = pd.read_json("{}main.json".format(dataPath)).fillna(0)
 values = pd.read_json("{}values.json".format(dataPath)).fillna(0)
+sets = pd.read_json("{}sets.json".format(dataPath))
+exceptions = list(values[mainStatChances][9:-1].index)
 
-def gen(specifiedType = None, lines=None):
+def gen(specifiedType = None, lines=None, domain="random", set= None):
+    if domain == "random":
+        domain = rng.choice(sets.columns)
+    else:
+        if domain not in sets.columns: return "Domain not available"
+    if set == None:
+        set = rng.choice(sets[domain])
+    else:
+        if set not in sets.values:
+            return "Set not available"
+        else:
+            domain = sets[sets == set].dropna(axis = 1, how="all").columns[0]
     artifact = {"Stat":{}, "Value":{}}
+    artifact["Stat"]["set"] = domain
+    artifact["Value"]["set"] = set
     a = rng.choice(mainStatChances.columns) if specifiedType == None else specifiedType
     myType = mainStatChances[a][mainStatChances[a] > 0] * 100
     stat = getStat(myType)
     artifact["Stat"]["mainStat"] = stat
-    tempName = myType.name
 
-    if myType.name == "Circlet":
-        if stat in ['Crit Rate%', 'Crit DMG%']:
-            tempName +="Crit"
-        elif stat in 'Healing Bonus%':
-            tempName += 'HB'
-        else :
-            tempName += "Normal"
-    elif myType.name == "Goblet":
-        if stat in ['ATK%', 'HP%', 'DEF%', 'Elemental Mastery', 'Energy Recharge%']:
-            tempName +="NonEl"
-        else :
-            tempName += "El"
+    tempName = reFormatSpecialType(myType.name, stat)
 
     artifact["Stat"]["type"] = tempName
     artifact["Value"]["type"] = 0
@@ -182,9 +178,10 @@ def upgradeCount(artifact, count = 0):
 def upgradeMax(artifact):
     return upgradeCount(artifact, 5)
 
-def createCustom(type = "Flower", mainStat=["HP", 717.0], substats = ["DEF%", "DEF", "ATK"], svalues = [5.1, 16, 13]):
+def createCustom(type, mainStat, substats, svalues, setName):
     if len(substats) > 4 or len(svalues) > 4 or (len(substats) != len(svalues)):
         return "Invalid"
+    domain = sets[sets == setName].dropna(axis = 1, how="all").columns[0]
     main = [mainStat[0],mainStat[1]]
     aType = [type, 0.0]
     subs = []
@@ -193,9 +190,9 @@ def createCustom(type = "Flower", mainStat=["HP", 717.0], substats = ["DEF%", "D
     subsIndex = []
     for k in range(len(substats)):
         subsIndex.append("sub" + str(k+1))
-    data = [main, aType]
+    data = [[domain, setName], main, aType]
     data.extend(subs)
-    indices = ["mainStat", "type"]
+    indices = ["set", "mainStat", "type"]
     indices.extend(subsIndex)
     artifact = pd.DataFrame(data, index=indices, columns=["Stat", "Value"])
     return artifact
@@ -250,27 +247,31 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
 def imageToArtifact(path):
     i = imageProcessor.readFromImage(path)
     if not isinstance(i, list): return i
-    aType, mainStat, subS, subV = i
+    setName, aType, mainStat, subS, subV = i
     if mainStat[0] == "NULL" or mainStat[0] not in mainStatChances[aType].index.tolist():
         choices = mainStatChances[aType][mainStatChances[aType] > 0].index.tolist()
         mainStat[0] = rng.choice(choices)
     
-    if aType == "Circlet":
-        if mainStat[0] in ['Crit Rate%', 'Crit DMG%']:
-            aType +="Crit"
-        elif mainStat[0] in 'Healing Bonus%':
-            aType += 'HB'
-        else :
-            aType += "Normal"
-    elif aType == "Goblet":
-        if mainStat[0] in ['ATK%', 'HP%', 'DEF%', 'Elemental Mastery', 'Energy Recharge%']:
-            aType +="NonEl"
-        else :
-            aType += "El"
+    aType = reFormatSpecialType(aType, mainStat[0])
 
     if mainStat[1] == 0:
         try:
             mainStat[1] = values.loc[mainStat[0], "mainStat"][0]
         except:
             mainStat[1] = values.loc[mainStat[0], "mainStat"]
-    return createCustom(aType, mainStat, subS, subV)
+    return createCustom(aType, mainStat, subS, subV, setName)
+
+def reFormatSpecialType(aType, mainStat):
+    if aType == "Circlet":
+        if mainStat in ['Crit Rate%', 'Crit DMG%']:
+            aType +="Crit"
+        elif mainStat in 'Healing Bonus%':
+            aType += 'HB'
+        else :
+            aType += "Normal"
+    elif aType == "Goblet":
+        if mainStat in ['ATK%', 'HP%', 'DEF%', 'Elemental Mastery', 'Energy Recharge%']:
+            aType +="NonEl"
+        else :
+            aType += "El"
+    return aType

@@ -22,19 +22,15 @@ def render(artifact, save= False, name="default", show = True, path="savedArtifa
     bgEdit = ImageDraw.Draw(background)
     mStat = artifact.loc["mainStat", "Stat"]
     mStatV = str(artifact.loc["mainStat", "Value"])
-    if "%" not in mStat:
-        mStatV = mStatV[:-2]
-    else:
+    if "%" in mStat:
         mStatV = mStatV + "%"
     bgEdit.text((20,125), mStat, (196, 169, 162), font=regFont)
     bgEdit.text((20,150), mStatV, (245, 245, 245), font=boldFont)
     pos = 300
-    for i in range(len(artifact) - 2):
-        s = artifact.iloc[i+2, 0]
-        v = str(artifact.iloc[i+2, 1])
-        if "%" not in s:
-            v = v[:-2]
-        else:
+    for i in range(len(artifact) - 3):
+        s = artifact.iloc[i+3, 0]
+        v = str(artifact.iloc[i+3, 1])
+        if "%"in s:
             v = v + "%"
         t = "•  " + s + " +" + v
         bgEdit.text((55, pos), t, (80, 84, 87), font=smallBoldFont)
