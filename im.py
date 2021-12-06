@@ -11,21 +11,28 @@ regFont = ImageFont.truetype("{}Lato-Regular.ttf".format(fontPath), 24)
 boldFont = ImageFont.truetype("{}Lato-Bold.ttf".format(fontPath), 40)
 smallBoldFont = ImageFont.truetype("{}Lato-Bold.ttf".format(fontPath), 24)
 
-def render(artifact, save= False, name="default", show = True, path="savedArtifacts/", set = ["emblem", "shiminawa"]):
-    chosenSet = rng.choice(set)
+def render(artifact, save= False, name="default", show = True, path="savedArtifacts/"):
+    set = artifact.loc["set", "Value"]
     type = artifact.loc["type", "Stat"]
     if "Goblet" in type:
         type = "Goblet"
     elif "Circlet" in type:
         type = "Circlet"
-    background = Image.open("static/{}/{}.jpg".format(chosenSet, type))
+    background = Image.open("static/{}/{}.jpg".format(set, type))
     bgEdit = ImageDraw.Draw(background)
     mStat = artifact.loc["mainStat", "Stat"]
     mStatV = str(artifact.loc["mainStat", "Value"])
+    level = int(artifact.loc["type", "Value"])
+    levelStr = "+" + str(level)
     if "%" in mStat:
         mStatV = mStatV + "%"
     bgEdit.text((20,125), mStat, (196, 169, 162), font=regFont)
     bgEdit.text((20,150), mStatV, (245, 245, 245), font=boldFont)
+    # bgEdit.rounded_rectangle((24,252, 70, 285),radius= 5, fill=(150,154,157))
+    if level > 10:
+        bgEdit.text((25, 253), levelStr, (27,27,27), font = smallBoldFont)
+    else:
+        bgEdit.text((30, 253), levelStr, (27,27,27), font = smallBoldFont)
     pos = 300
     for i in range(len(artifact) - 3):
         s = artifact.iloc[i+3, 0]

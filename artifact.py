@@ -15,7 +15,7 @@ subStatChances = pd.read_json("{}sub.json".format(dataPath)).fillna(0)
 mainStatChances = pd.read_json("{}main.json".format(dataPath)).fillna(0)
 values = pd.read_json("{}values.json".format(dataPath)).fillna(0)
 sets = pd.read_json("{}sets.json".format(dataPath))
-exceptions = list(values[mainStatChances][9:-1].index)
+exceptions = values[mainStatChances][9:-1].index.tolist()
 
 def gen(specifiedType = None, lines=None, domain="random", set= None):
     if domain == "random":
@@ -178,12 +178,12 @@ def upgradeCount(artifact, count = 0):
 def upgradeMax(artifact):
     return upgradeCount(artifact, 5)
 
-def createCustom(type, mainStat, substats, svalues, setName):
+def createCustom(type,level, mainStat, substats, svalues, setName):
     if len(substats) > 4 or len(svalues) > 4 or (len(substats) != len(svalues)):
         return "Invalid"
     domain = sets[sets == setName].dropna(axis = 1, how="all").columns[0]
     main = [mainStat[0],mainStat[1]]
-    aType = [type, 0.0]
+    aType = [type, level]
     subs = []
     for i in range(len(substats)):
         subs.append([substats[i], svalues[i]])
@@ -219,8 +219,9 @@ def reset(count = 0):
             save_artifact(gen())
     else : removeArtifact()
 
-def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", set = ["emblem", "shiminawa"]):
+def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", set = "default"):
     if count < 1 : return
+    domain = None
     path = None
     try:
         path = os.path.join(parent_dir, "savedArtifacts/" + directory)
@@ -234,11 +235,37 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
         if count > 25: count = 25
         for a in range(count):
             artifact = gen()
-            renderer.render(artifact, save= True, name=str(a+1), path = path, show=False, set = set)
+            if set == "random":
+                domain = rng.choice(sets.columns)
+                set = rng.choice(sets[domain])
+            elif set == "default":
+                set = artifact.loc["set", "Value"]
+                domain = artifact.loc["set", "Stat"]
+            else:
+                try:
+                    domain = sets[sets == set].dropna(axis = 1, how="all").columns[0]
+                except:
+                    return "Set unavailable"
+            artifact.loc["type", "Value"] == set
+            artifact.loc["type", "Stat"] == domain
+            renderer.render(artifact, save= True, name=str(a+1), path = path, show=False)
     elif isinstance(artifact, pd.DataFrame):
         stop = 0
+        if set == "random":
+            domain = rng.choice(sets.columns)
+            set = rng.choice(sets[domain])
+        elif set == "default":
+            set = artifact.loc["set", "Value"]
+            domain = artifact.loc["set", "Stat"]
+        else:
+            try:
+                domain = sets[sets == set].dropna(axis = 1, how="all").columns[0]
+            except:
+                return "Set unavailable"
+        artifact.loc["type", "Value"] == set
+        artifact.loc["type", "Stat"] == domain
         for a in range(count):
-            renderer.render(artifact, save= True, name=str(a), path = path, show=False, set = set)
+            renderer.render(artifact, save= True, name=str(a), path = path, show=False)
             artifact = upgrade(artifact)
             stop += 1
             if stop == 6: return
@@ -247,19 +274,20 @@ def saveCopies(artifact = "random", count = 1, name = 0, directory = "default", 
 def imageToArtifact(path):
     i = imageProcessor.readFromImage(path)
     if not isinstance(i, list): return i
-    setName, aType, mainStat, subS, subV = i
+    setName, level, aType, mainStat, subS, subV = i
     if mainStat[0] == "NULL" or mainStat[0] not in mainStatChances[aType].index.tolist():
+        # print(mainStat[0])
         choices = mainStatChances[aType][mainStatChances[aType] > 0].index.tolist()
         mainStat[0] = rng.choice(choices)
     
     aType = reFormatSpecialType(aType, mainStat[0])
 
-    if mainStat[1] == 0:
+    if mainStat[1] == 0 or "FILL":
         try:
             mainStat[1] = values.loc[mainStat[0], "mainStat"][0]
         except:
             mainStat[1] = values.loc[mainStat[0], "mainStat"]
-    return createCustom(aType, mainStat, subS, subV, setName)
+    return createCustom(aType, level, mainStat, subS, subV, setName)
 
 def reFormatSpecialType(aType, mainStat):
     if aType == "Circlet":
@@ -275,3 +303,6 @@ def reFormatSpecialType(aType, mainStat):
         else :
             aType += "El"
     return aType
+# k = gen(specifiedType="Circlet")
+# saveCopies(gen(specifiedType="Circlet"), directory="b")
+print(imageToArtifact("savedArtifacts/b/0.jpg"))
