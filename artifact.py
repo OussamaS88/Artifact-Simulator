@@ -1,3 +1,4 @@
+from matplotlib.pyplot import plot
 import numpy as np
 import pandas as pd
 from numpy.random import default_rng
@@ -5,6 +6,7 @@ import json
 import im as renderer
 import os
 import text as imageProcessor
+import plot as plotter
 
 rng = default_rng()
 parent_dir = os.getcwd()
@@ -276,7 +278,6 @@ def imageToArtifact(path):
     if not isinstance(i, list): return i
     setName, level, aType, mainStat, subS, subV = i
     if mainStat[0] == "NULL" or mainStat[0] not in mainStatChances[aType].index.tolist():
-        # print(mainStat[0])
         choices = mainStatChances[aType][mainStatChances[aType] > 0].index.tolist()
         mainStat[0] = rng.choice(choices)
     
@@ -303,6 +304,5 @@ def reFormatSpecialType(aType, mainStat):
         else :
             aType += "El"
     return aType
-# k = gen(specifiedType="Circlet")
-# saveCopies(gen(specifiedType="Circlet"), directory="b")
-print(imageToArtifact("savedArtifacts/b/0.jpg"))
+reset()
+# plotter.barDem(artifacts = retrieveArtifact())
